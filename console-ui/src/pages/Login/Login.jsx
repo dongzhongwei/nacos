@@ -21,7 +21,7 @@ import { withRouter } from 'react-router-dom';
 import './index.scss';
 import Header from '../../layouts/Header';
 import PropTypes from 'prop-types';
-import { login, guide, state } from '../../reducers/base';
+import { login, role, guide, state } from '../../reducers/base';
 
 const FormItem = Form.Item;
 
@@ -73,8 +73,15 @@ class Login extends React.Component {
       }
       login(values)
         .then(res => {
+          // localStorage.setItem('token', JSON.stringify(res));
+          // this.props.history.push('/');
+          // ddw
           localStorage.setItem('token', JSON.stringify(res));
-          this.props.history.push('/');
+          role().then(roleRes => {
+            localStorage.setItem('role', roleRes.data);
+            window.namespaceList = [];
+            this.props.history.push('/');
+          });
         })
         .catch(() => {
           Message.error({

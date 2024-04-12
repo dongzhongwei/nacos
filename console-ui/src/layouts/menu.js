@@ -86,19 +86,28 @@ const settingMenu = {
 export default function(model) {
   const { token = '{}' } = localStorage;
   const { globalAdmin } = isJsonString(token) ? JSON.parse(token) || {} : {};
+  if (!globalAdmin) {
+    configurationMenu.children.splice(2, 1);
+  }
   const result = [];
   if (model === 'naming') {
-    result.push(serviceDiscoveryMenu);
+    if (globalAdmin) {
+      result.push(serviceDiscoveryMenu);
+    }
   } else if (model === 'config') {
     result.push(configurationMenu);
   } else {
-    result.push(configurationMenu, serviceDiscoveryMenu);
+    result.push(configurationMenu);
+    if (globalAdmin) {
+      result.push(serviceDiscoveryMenu);
+    }
   }
   if (globalAdmin) {
     result.push(authorityControlMenu);
+
+    result.push(namespaceMenu);
+    result.push(clusterMenu);
+    result.push(settingMenu);
   }
-  result.push(namespaceMenu);
-  result.push(clusterMenu);
-  result.push(settingMenu);
   return result.filter(item => item);
 }

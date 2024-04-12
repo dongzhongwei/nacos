@@ -49,7 +49,11 @@ class HistoryRollback extends React.Component {
     this.field = new Field(this);
     this.appName = getParams('appName') || '';
     this.preAppName = this.appName;
-    this.group = getParams('historyGroup') || '';
+    // this.group = getParams('historyGroup') || '';
+    this.group =
+      localStorage.getItem('role') === 'ROLE_ADMIN'
+        ? getParams('historyGroup') || ''
+        : localStorage.getItem('role');
     this.preGroup = this.group;
 
     this.dataId = getParams('historyDataId') || '';
@@ -95,9 +99,11 @@ class HistoryRollback extends React.Component {
   cleanAndGetData(needclean = false) {
     if (needclean) {
       this.dataId = '';
-      this.group = '';
+      // this.group = '';
+      this.group =
+        localStorage.getItem('role') === 'ROLE_ADMIN' ? '' : localStorage.getItem('role');
       this.setState({
-        group: '',
+        group: this.group,
         dataId: '',
       });
       setParams('historyGroup', '');
@@ -375,32 +381,36 @@ class HistoryRollback extends React.Component {
                   }}
                 />
               </Form.Item>
-              <Form.Item label="Group:" required>
-                <Select
-                  style={{ width: 200 }}
-                  size="medium"
-                  hasArrow
-                  mode="single"
-                  placeholder={locale.group}
-                  dataSource={this.state.groups}
-                  value={this.state.group}
-                  hasClear
-                  showSearch
-                  onChange={val => {
-                    if (!val) {
-                      val = '';
-                    }
-                    this.setState({ group: val });
-                    setParams('historyGroup', val);
-                  }}
-                  onSearch={val => {
-                    const { groups } = this.state;
-                    if (!groups.includes(val)) {
-                      this.setState({ groups: groups.concat(val) });
-                    }
-                  }}
-                />
-              </Form.Item>
+              {localStorage.getItem('role') === 'ROLE_ADMIN' ? (
+                <Form.Item label="Group:" required>
+                  <Select
+                    style={{ width: 200 }}
+                    size="medium"
+                    hasArrow
+                    mode="single"
+                    placeholder={locale.group}
+                    dataSource={this.state.groups}
+                    value={this.state.group}
+                    hasClear
+                    showSearch
+                    onChange={val => {
+                      if (!val) {
+                        val = '';
+                      }
+                      this.setState({ group: val });
+                      setParams('historyGroup', val);
+                    }}
+                    onSearch={val => {
+                      const { groups } = this.state;
+                      if (!groups.includes(val)) {
+                        this.setState({ groups: groups.concat(val) });
+                      }
+                    }}
+                  />
+                </Form.Item>
+              ) : (
+                ''
+              )}
               <Form.Item label="">
                 <Form.Submit
                   validate

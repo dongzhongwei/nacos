@@ -35,6 +35,11 @@ const initialState = {
 const login = user => request.post('v1/auth/users/login', user);
 
 /**
+ * 用户角色
+ */
+const role = () => request.get('v1/console/user/roles');
+
+/**
  * 单独在login处调用 获取提示信息
  */
 const guide = () => request.get('v1/console/server/guide');
@@ -129,4 +134,4 @@ export default (state = initialState, action) => {
   }
 };
 
-export { getState, login, getNotice, getGuide, guide, state };
+export { getState, login, role, getNotice, getGuide, guide, state };

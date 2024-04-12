@@ -131,7 +131,8 @@ class NameSpaceList extends React.Component {
   }
 
   handleNameSpaces(data) {
-    const nownamespace = getParams('namespace') || '';
+    console.info(data[0].namespace);
+    const nownamespace = getParams('namespace') || (data.length > 0 ? data[0].namespace : '');
 
     // let namespaceShowName = this._namespaceShowName || data[0].namespaceShowName || '';
     window.namespaceList = data;

@@ -61,7 +61,11 @@ class NewConfig extends React.Component {
     this.field.setValue('appName', this.inApp ? this.edasAppName : '');
     this.inEdas = window.globalConfig.isParentEdas();
     this.dataId = getParams('dataId') || '';
-    this.group = getParams('group') || 'DEFAULT_GROUP';
+    this.group =
+      getParams('group') ||
+      (localStorage.getItem('role') === 'ROLE_ADMIN'
+        ? 'DEFAULT_GROUP'
+        : localStorage.getItem('role'));
     this.searchDataId = getParams('searchDataId') || '';
     this.searchGroup = getParams('searchGroup') || '';
     this.state = {
@@ -499,6 +503,7 @@ class NewConfig extends React.Component {
           </FormItem>
           <FormItem label={'Group'} required>
             <Combobox
+              disabled={this.group !== 'DEFAULT_GROUP'}
               style={{ width: '100%' }}
               size={'large'}
               hasArrow

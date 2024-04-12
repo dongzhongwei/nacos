@@ -51,6 +51,7 @@ import QueryResult from '../../../components/QueryResult';
 
 import './index.scss';
 import { LANGUAGE_KEY, GLOBAL_PAGE_SIZE_LIST, LOGINPAGE_ENABLED } from '../../../constants';
+import { isJsonString } from '../../../utils/nacosutil';
 
 const { Item } = MenuButton;
 const { Panel } = Collapse;
@@ -77,7 +78,10 @@ class ConfigurationManagement extends React.Component {
     this.field = new Field(this);
     this.appName = getParams('appName') || '';
     this.preAppName = this.appName;
-    this.group = getParams('group') || '';
+    this.group =
+      localStorage.getItem('role') === 'ROLE_ADMIN'
+        ? getParams('group') || ''
+        : localStorage.getItem('role');
     this.preGroup = this.group;
     this.dataId = getParams('dataId') || '';
     this.preDataId = this.dataId;
@@ -86,6 +90,9 @@ class ConfigurationManagement extends React.Component {
     this.edasAppName = getParams('edasAppName') || '';
     this.inApp = this.edasAppId;
     this.isAdvance = getParams('isAdvanceQuery') || false;
+    const { token = '{}' } = localStorage;
+    const { globalAdmin } = isJsonString(token) ? JSON.parse(token) || {} : {};
+    this.globalAdmin = globalAdmin;
     this.state = {
       value: '',
       visible: false,
@@ -123,6 +130,7 @@ class ConfigurationManagement extends React.Component {
       },
       isPageEnter: false,
       defaultFuzzySearch: true,
+      globalAdmin: this.globalAdmin,
     };
     const obj = {
       dataId: this.dataId || '',
@@ -227,13 +235,15 @@ class ConfigurationManagement extends React.Component {
   cleanAndGetData(needclean = false) {
     if (needclean) {
       this.dataId = '';
-      this.group = '';
+      // this.group = '';
+      this.group =
+        localStorage.getItem('role') === 'ROLE_ADMIN' ? '' : localStorage.getItem('role');
       this.setState({
-        group: '',
+        group: this.group,
         dataId: '',
       });
       setParams({
-        group: '',
+        group: this.group,
         dataId: '',
       });
     }
@@ -398,10 +408,16 @@ class ConfigurationManagement extends React.Component {
           {locale.details}
         </a>
         <span style={{ marginRight: 5 }}>|</span>
-        <a style={{ marginRight: 5 }} onClick={this.showCode.bind(this, record)}>
-          {locale.sampleCode}
-        </a>
-        <span style={{ marginRight: 5 }}>|</span>
+        {this.globalAdmin ? (
+          <span>
+            <a style={{ marginRight: 5 }} onClick={this.showCode.bind(this, record)}>
+              {locale.sampleCode}
+            </a>
+            <span style={{ marginRight: 5 }}>|</span>
+          </span>
+        ) : (
+          ''
+        )}
         <a style={{ marginRight: 5 }} onClick={this.goEditor.bind(this, record)}>
           {locale.edit}
         </a>
@@ -421,7 +437,7 @@ class ConfigurationManagement extends React.Component {
         >
           <Menu onItemClick={this.chooseNav.bind(this, record)}>
             <Menu.Item key={'nav1'}>{locale.version}</Menu.Item>
-            <Menu.Item key={'nav3'}>{locale.listenerQuery}</Menu.Item>
+            {this.globalAdmin ? <Menu.Item key={'nav3'}>{locale.listenerQuery}</Menu.Item> : ''}
           </Menu>
         </Dropdown>
       </div>
@@ -757,7 +773,11 @@ class ConfigurationManagement extends React.Component {
           <Input defaultValue={value} onBlur={editableTableOnBlur.bind(this, record, 1)} />
         );
         let renderEditableTableCellGroup = (value, index, record) => (
-          <Input defaultValue={value} onBlur={editableTableOnBlur.bind(this, record, 2)} />
+          <Input
+            defaultValue={value}
+            onBlur={editableTableOnBlur.bind(this, record, 2)}
+            disabled={!self.state.globalAdmin}
+          />
         );
 
         const cloneConfirm = Dialog.confirm({
@@ -1189,22 +1209,24 @@ class ConfigurationManagement extends React.Component {
                     onPressEnter={() => this.selectAll()}
                   />
                 </Form.Item>
-
-                <Form.Item label="Group">
-                  <Select.AutoComplete
-                    style={{ width: 200 }}
-                    size={'medium'}
-                    placeholder={
-                      this.state.defaultFuzzySearch ? locale.defaultFuzzyg : locale.fuzzyg
-                    }
-                    dataSource={this.state.groups}
-                    value={this.state.group}
-                    onChange={this.setGroup.bind(this)}
-                    onPressEnter={() => this.selectAll()}
-                    hasClear
-                  />
-                </Form.Item>
-
+                {localStorage.getItem('role') === 'ROLE_ADMIN' ? (
+                  <Form.Item label="Group">
+                    <Select.AutoComplete
+                      style={{ width: 200 }}
+                      size={'medium'}
+                      placeholder={
+                        this.state.defaultFuzzySearch ? locale.defaultFuzzyg : locale.fuzzyg
+                      }
+                      dataSource={this.state.groups}
+                      value={this.state.group}
+                      onChange={this.setGroup.bind(this)}
+                      onPressEnter={() => this.selectAll()}
+                      hasClear
+                    />
+                  </Form.Item>
+                ) : (
+                  ''
+                )}
                 <Form.Item label={locale.fuzzydMode}>
                   <Switch
                     checkedChildren=""
